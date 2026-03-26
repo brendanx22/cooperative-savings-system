@@ -1,8 +1,8 @@
 -- Cooperative Savings System Database Schema
 
 -- Drop tables if they exist (for development)
-DROP TABLE IF EXISTS transaction_logs CASCADE;
 DROP TABLE IF EXISTS loan_payments CASCADE;
+DROP TABLE IF EXISTS transaction_logs CASCADE;
 DROP TABLE IF EXISTS loans CASCADE;
 DROP TABLE IF EXISTS accounts CASCADE;
 DROP TABLE IF EXISTS members CASCADE;
@@ -31,6 +31,7 @@ CREATE TABLE members (
     join_date DATE DEFAULT CURRENT_DATE,
     status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'inactive', 'suspended')),
     password_hash VARCHAR(255) NOT NULL,
+    is_admin BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -69,19 +70,6 @@ CREATE TABLE loans (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Loan Payments Table
-CREATE TABLE loan_payments (
-    id SERIAL PRIMARY KEY,
-    loan_id INTEGER REFERENCES loans(id) ON DELETE CASCADE,
-    payment_amount DECIMAL(15,2) NOT NULL,
-    principal_amount DECIMAL(15,2) NOT NULL,
-    interest_amount DECIMAL(15,2) NOT NULL,
-    payment_date DATE DEFAULT CURRENT_DATE,
-    payment_method VARCHAR(50),
-    transaction_id INTEGER REFERENCES transaction_logs(id),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
 -- Transaction Logs Table
 CREATE TABLE transaction_logs (
     id SERIAL PRIMARY KEY,
@@ -95,6 +83,19 @@ CREATE TABLE transaction_logs (
     description TEXT,
     reference_number VARCHAR(50),
     created_by INTEGER REFERENCES members(id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Loan Payments Table
+CREATE TABLE loan_payments (
+    id SERIAL PRIMARY KEY,
+    loan_id INTEGER REFERENCES loans(id) ON DELETE CASCADE,
+    payment_amount DECIMAL(15,2) NOT NULL,
+    principal_amount DECIMAL(15,2) NOT NULL,
+    interest_amount DECIMAL(15,2) NOT NULL,
+    payment_date DATE DEFAULT CURRENT_DATE,
+    payment_method VARCHAR(50),
+    transaction_id INTEGER REFERENCES transaction_logs(id),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
